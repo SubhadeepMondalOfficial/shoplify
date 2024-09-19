@@ -1,0 +1,33 @@
+/* swiper-custom.css */
+
+/* Custom styles for Swiper navigation buttons */
+.swiper-button-next,
+.swiper-button-prev {
+    color: #ff5722; /* Custom color for navigation arrows */
+    /* background-color: rgba(0, 0, 0, 0.5);  */
+    /* border-radius: 50%;  */
+    width: 40px; /* Optional: custom width */
+    height: 40px; /* Optional: custom height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+    color: #ffffff; /* Change color on hover */
+    background-color: rgba(255, 87, 34, 0.8); /* Change background color on hover */
+    /* background-color: rgba(0, 0, 0, 0.5);  */
+    transition: all;
+    transition-duration: 300ms;
+}
+
+/* Custom position if needed */
+.swiper-button-next {
+    right: 10px;
+}
+
+.swiper-button-prev {
+    left: 10px;
+}
