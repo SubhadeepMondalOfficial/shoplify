@@ -82,7 +82,7 @@ const Cart = () => {
                         products.map((item, index) => (
                             <div key={index} className="flex flex-col md:flex-row gap-5 mb-10 space-y-3 relative justify-center md:justify-start items-center md:items-start">
                                 <div className="">
-                                    <img src={item.image} alt="" className="object-cover w-[160px] h-[150px]"  />
+                                    <img src={item.imgUrl} alt="" className="object-cover w-[160px] h-[150px]"  />
                                 </div>
                                 <div className="space-y-2">
                                     <h2 className="font-bold">{item.title.substring(0, 60)}...</h2>
