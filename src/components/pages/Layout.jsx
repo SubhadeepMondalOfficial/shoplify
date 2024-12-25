@@ -265,7 +265,7 @@ const Layout = ({ children }) => {
 
           <div className="px-3 col-span-2">
             <h3 className="font-semibold text-xl mb-4">Contact Us</h3>
-            <form className="space-y-3">
+            <form className="space-y-3 text-black">
               <input
                 required
                 name="fullname"

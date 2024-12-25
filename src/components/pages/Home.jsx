@@ -8,7 +8,7 @@ import "./swiper-custom.css"; //Import custom CSS for Swiper
 import Swal from "sweetalert2";
 import firebaseAppConfig from "../../config/firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs, query, where, doc, setDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 import { FaCartPlus } from "react-icons/fa6";
@@ -22,6 +22,7 @@ const Home = () => {
   const [userId, setUserId] = useState('')
   const [session, setSession] = useState(null)
   const [products, setProducts] = useState([])
+  const [cartDocId, setCartDocId] = useState(null)
 
   // const products = [
   //   {
@@ -114,6 +115,7 @@ const Home = () => {
       const temp = [];
       snapshot.forEach((doc) => {
         const docFile = doc.data();
+        docFile.productId = doc.id;
         temp.push(docFile)
       })
       setProducts(temp);
@@ -125,8 +127,37 @@ const Home = () => {
     try {
       //checking if user is login then add to cart, otherwise login first
       if (session) {
-        item.userId = userId;
-        await addDoc(collection(db, "carts"), item);
+        //? Searching is any cart is alloted to user or not
+        const col = collection(db, "carts");
+        const q = query(col, where("userId", "==", session.uid));
+        const snapshot = await getDocs(q);
+        let temp = [];
+        let isCartAlloted = false
+        snapshot.forEach((doc) => {
+          const document = doc.data();
+          document.itemId = doc.id // also added itemId with item details to perform other operation like delete from cart
+          setCartDocId(doc.id)
+          temp.push(document);
+          isCartAlloted = true;
+        })
+
+        //? If any CartId is alloted to user then otherwise new cart doc will create
+        if(isCartAlloted){
+          let cartItems = temp[0].cartItems;
+          cartItems.push(item.productId)
+          let userCartId = temp[0].itemId;
+          const ref = doc(db, "carts", userCartId)
+          setDoc(ref, {cartItems: cartItems}, {merge: true})
+        }
+        else{
+          item.userId = userId;
+          const createCart = {
+            userId: userId,
+            cartItems: [item.productId]
+          }
+          await addDoc(collection(db, "carts"), createCart);
+          console.log("No cart alloted to user");
+        }
 
         Swal.fire({
           icon: "success",
@@ -143,6 +174,56 @@ const Home = () => {
         title: "Failed",
         text: `${error.message}`,
       });
+      console.log(error.message);
+    }
+  }
+
+  async function buyNowBtn(item) {
+    try {
+      //checking if user is login then add to cart, otherwise login first
+      if (session) {
+        //? Searching is any cart is alloted to user or not
+        const col = collection(db, "carts");
+        const q = query(col, where("userId", "==", session.uid));
+        const snapshot = await getDocs(q);
+        let temp = [];
+        let isCartAlloted = false
+        snapshot.forEach((doc) => {
+          const document = doc.data();
+          document.itemId = doc.id // also added itemId with item details to perform other operation like delete from cart
+          setCartDocId(doc.id)
+          temp.push(document);
+          isCartAlloted = true;
+        })
+
+        //? If any CartId is alloted to user then otherwise new cart doc will create
+        if(isCartAlloted){
+          let cartItems = temp[0].cartItems;
+          cartItems.push(item.productId)
+          let userCartId = temp[0].itemId;
+          const ref = doc(db, "carts", userCartId)
+          setDoc(ref, {cartItems: cartItems}, {merge: true})
+        }
+        else{
+          item.userId = userId;
+          const createCart = {
+            userId: userId,
+            cartItems: [item.productId]
+          }
+          await addDoc(collection(db, "carts"), createCart);
+          console.log("No cart alloted to user");
+        }
+
+        setTimeout(()=> {
+          navigate("/cart")
+        }, 500)
+
+      } else {
+        navigate("/login");
+      }
+
+    } catch (error) {
+      console.log(`Failed to Buy Now, Error=> ${error.message}`);
     }
   }
 
@@ -210,7 +291,7 @@ const Home = () => {
                 <h3 className="font-semibold capitalize">{item.title.slice(0, 50)}...</h3>
                 <div className="flex gap-2">
                   <span className="font-semibold">
-                    ₹{item.price - (item.price * item.discount) / 100 - 1}
+                    ₹{item.price - (item.price * item.discount) / 100}
                   </span>
                   <del className="opacity-60">{item.price}</del>
                   <span>({item.discount}% off)</span>
@@ -219,7 +300,7 @@ const Home = () => {
                   <button className="bg-green-400 rounded-full p-3 absolute -top-6 right-3 hover:bg-green-500 hover:text-white" onClick={() => addToCartBtn(item)}>
                     <FaCartPlus className="text-2xl" />
                   </button>
-                  <button className="w-full py-3 bg-[#FD5C36] text-xl font-semibold text-white hover:bg-green-500 transition-all duration-200">
+                  <button className="w-full py-3 bg-[#FD5C36] text-xl font-semibold text-white hover:bg-green-500 transition-all duration-200" onClick={() => buyNowBtn(item)}>
                     Buy Now
                   </button>
                 </div>

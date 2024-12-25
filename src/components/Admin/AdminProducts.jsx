@@ -123,7 +123,7 @@ const AdminProducts = () => {
               {/* <p className="opacity-60">{item.description.slice(0, 100)}...</p> */}
               <div className="flex gap-2">
                 <span className="font-semibold">
-                  ₹{(item.price - (item.price * item.discount) / 100 - 1).toFixed(2)}
+                  ₹{(item.price - (item.price * item.discount) / 100).toFixed(2)}
                 </span>
                 <del className="opacity-60">{item.price}</del>
                 <span>({item.discount}% off)</span>
