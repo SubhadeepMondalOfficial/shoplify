@@ -1,4 +1,5 @@
 import Layout from "./Layout"
+import axios from "axios";
 import { RiShoppingCartLine } from "react-icons/ri";
 import { MdDeleteForever } from "react-icons/md";
 import { IoBag } from "react-icons/io5";
@@ -16,6 +17,7 @@ const Cart = () => {
   const navigate = useNavigate()
   const [session, setSession] = useState('');
   const [products, setProducts] = useState([]);
+  const [cartItemsId, setCartItemsId] = useState([])
   const [cartDocId, setCartDocId] = useState(null)
   // const [allItemId, setAllItemId] = useState(null)
   const [itemRemove, setItemRemove] = useState(false) //this state is use if any item remove from cart then live update in UI
@@ -53,6 +55,7 @@ const Cart = () => {
           })
           // setProducts(temp);
           let allItemId = temp[0].cartItems
+          setCartItemsId(allItemId);
           
           // if any product id present in cart
           if(allItemId){
@@ -102,6 +105,36 @@ const Cart = () => {
     }
   }
 
+
+  //!================= Payment Gateway Integration =================
+  let data = {
+    name: session.displayName,
+    userId: session.uid,
+    amount: totalPrice,
+    phone: "9134567890",
+    email: session.email,
+    cartDocId: cartDocId,
+    cartItemsId: cartItemsId,
+    transactionId: 'T' + Date.now()
+  }
+
+  const handlePayment = async () => {
+    try {
+      await axios.post('http://localhost:8000/payment', data).then(res => {
+        // console.log('FrontEnd Payment Gateway Response => ', res.data);
+        if(res.data.success === true){
+          window.location.href = res.data.data.instrumentResponse.redirectInfo.url;
+        }
+      }).catch(error => {
+        console.log('FrontEnd Payment Gateway Error => ', error.message);
+      })
+      
+    } catch (error) {
+      console.log(`Error in FrontEnd /payment Route => ${error.message}`);
+      
+    }
+  }
+
     return(
         <Layout>
             <main className="px-5">
@@ -133,7 +166,12 @@ const Cart = () => {
                     <div className="w-full h-[1px] bg-slate-200 mt-5 mb-8"></div>
                     <div className="flex flex-col md:flex-row gap-3 justify-between items-center">
                         <h3 className="text-2xl font-semibold">Total: ₹{totalPrice}</h3>
-                        <button className="flex gap-2 justify-center items-center px-4 py-2 text-white text-lg bg-[#FD3636] rounded"><IoBag />Buy Now</button>
+                        {
+                          cartItemsId.length > 0 ?
+                          (<button className="flex gap-2 justify-center items-center px-4 py-2 text-white text-lg bg-[#FD3636] rounded" onClick={handlePayment}><IoBag />Buy Now</button>)
+                          :
+                          (<button className="flex gap-2 justify-center items-center px-4 py-2 text-white text-lg bg-[#FD3636] rounded" onClick={() => navigate('/')}><IoBag />Add Product</button>)
+                        }
                     </div>
                 </div>
             </main>

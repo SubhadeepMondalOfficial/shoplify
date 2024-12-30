@@ -24,6 +24,7 @@ const Home = () => {
   const [products, setProducts] = useState([])
   const [cartDocId, setCartDocId] = useState(null)
 
+  //? Dummy Products
   // const products = [
   //   {
   //     title:
@@ -156,7 +157,7 @@ const Home = () => {
             cartItems: [item.productId]
           }
           await addDoc(collection(db, "carts"), createCart);
-          console.log("No cart alloted to user");
+          // console.log("No cart alloted to user");
         }
 
         Swal.fire({
@@ -211,7 +212,7 @@ const Home = () => {
             cartItems: [item.productId]
           }
           await addDoc(collection(db, "carts"), createCart);
-          console.log("No cart alloted to user");
+          // console.log("No cart alloted to user");
         }
 
         setTimeout(()=> {
